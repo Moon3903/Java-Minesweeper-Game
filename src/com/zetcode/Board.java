@@ -9,6 +9,9 @@ import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Board extends JPanel {
 
@@ -41,13 +44,20 @@ public class Board extends JPanel {
 
     private int allCells;
     private final JLabel statusbar;
+    private final JLabel timebar;
+    
+    //buat waktu
+    private Timer timer;
+    private int second;
+    private int minute;
 
-    public Board(JLabel statusbar) {
+    public Board(JLabel statusbar,JLabel timebar) {
 
-        this.statusbar = statusbar;
+    	this.timebar = timebar;
+		this.statusbar = statusbar;
         initBoard();
     }
-
+    
     private void initBoard() {
 
         setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
@@ -59,7 +69,9 @@ public class Board extends JPanel {
             var path = "src/resources/" + i + ".png";
             img[i] = (new ImageIcon(path)).getImage();
         }
-
+        //waktu di update setiap detik
+       timer1();
+        
         addMouseListener(new MinesAdapter());
         newGame();
     }
@@ -67,6 +79,8 @@ public class Board extends JPanel {
     private void newGame() {
 
         int cell;
+        second = 0;
+        minute = 0;
 
         var random = new Random();
         inGame = true;
@@ -81,6 +95,7 @@ public class Board extends JPanel {
         }
 
         statusbar.setText(Integer.toString(minesLeft));
+        timebar.setText("00:00");
 
         int i = 0;
 
@@ -153,6 +168,8 @@ public class Board extends JPanel {
                 }
             }
         }
+        
+        timer.start();
     }
 
     private void find_empty_cells(int j) {
@@ -245,12 +262,43 @@ public class Board extends JPanel {
         }
 
     }
+    
+    public void timer1(){
+    	//mengatur waktu
+        int delay = 1000; // one second 
+         ActionListener taskPerformer = new ActionListener() {
+             public void actionPerformed(ActionEvent evt) {
+            	 second+=1;
+            	 StringBuilder gameTime = new StringBuilder();
+            	 if(second == 60) {
+            		 minute+=1;
+            		 second=0;
+            	 }
+            	 if(minute<10) 
+            		 gameTime.append('0'+Integer.toString(minute)+':');
+            	 
+            	 else 
+            		 gameTime.append(Integer.toString(minute)+':');
+            	 
+            	 if(second<10) 
+            		 gameTime.append('0'+Integer.toString(second));
+            	 
+            	 else 
+            		 gameTime.append(Integer.toString(second));
+            	             	 
+                 timebar.setText(gameTime.toString());
+            	 repaint();
+             }
+         };
+         timer = new Timer(delay, taskPerformer);
+
+   }
 
     @Override
     public void paintComponent(Graphics g) {
 
         int uncover = 0;
-
+               
         for (int i = 0; i < N_ROWS; i++) {
 
             for (int j = 0; j < N_COLS; j++) {
@@ -293,8 +341,10 @@ public class Board extends JPanel {
 
             inGame = false;
             statusbar.setText("Game won");
+            timer.stop();
 
         } else if (!inGame) {
+        	timer.stop();
             statusbar.setText("Game lost");
         }
     }

@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 
 /**
  * Java Minesweeper Game
- *
+ * Repo : https://github.com/janbodnar/Java-Minesweeper-Game
  * Author: Jan Bodnar
  * Website: http://zetcode.com
  */
@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 public class Minesweeper extends JFrame {
 
     private JLabel statusbar;
+    private JLabel timebar;
 
     public Minesweeper() {
 
@@ -25,8 +26,12 @@ public class Minesweeper extends JFrame {
 
         statusbar = new JLabel("");
         add(statusbar, BorderLayout.SOUTH);
-
-        add(new Board(statusbar));
+        
+        //untuk slot waktu
+        timebar = new JLabel("");
+        add(timebar, BorderLayout.NORTH);
+        
+        add(new Board(statusbar,timebar));
 
         setResizable(false);
         pack();
@@ -37,11 +42,16 @@ public class Minesweeper extends JFrame {
     }
 
     public static void main(String[] args) {
-
-        EventQueue.invokeLater(() -> {
-
-            var ex = new Minesweeper();
-            ex.setVisible(true);
-        });
+    	try {
+	        EventQueue.invokeLater(() -> {
+	
+	            var ex = new Minesweeper();
+	            ex.setVisible(true);
+	        });
+    	}
+    	catch(Exception e) {
+    		//TO DO ???
+    		System.out.print("ERROR"); 
+    	}
     }
 }

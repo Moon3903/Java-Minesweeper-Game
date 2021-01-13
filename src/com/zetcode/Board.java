@@ -3,20 +3,23 @@ package com.zetcode;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class Board extends JPanel {
 
-    private final int NUM_IMAGES = 13;
-    private final int CELL_SIZE = 15;
+	private static final long serialVersionUID = -8164806567825451054L;
+	
+	private final int NUM_IMAGES = 13;
+    private int CELL_SIZE;
 
     private final int COVER_FOR_CELL = 10;
     private final int MARK_FOR_CELL = 10;
@@ -30,12 +33,12 @@ public class Board extends JPanel {
     private final int DRAW_MARK = 11;
     private final int DRAW_WRONG_MARK = 12;
 
-    private final int N_MINES = 40;
-    private final int N_ROWS = 16;
-    private final int N_COLS = 16;
+    private int N_MINES;
+    private int N_ROWS;
+    private int N_COLS;
 
-    private final int BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
-    private final int BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
+    private int BOARD_WIDTH = 500;
+    private int BOARD_HEIGHT = 530;
 
     private int[] field;
     private boolean inGame;
@@ -46,33 +49,49 @@ public class Board extends JPanel {
     private final JLabel statusbar;
     private final JLabel timebar;
     
-    //buat waktu
     private Timer timer;
     private int second;
     private int minute;
+    
+    private boolean inMenu = true;
+    private Menu menu;
+    
+    private HighScore hs;
 
     public Board(JLabel statusbar,JLabel timebar) {
-
     	this.timebar = timebar;
 		this.statusbar = statusbar;
-        initBoard();
+		System.out.print("ok\n");
+		initMenu();
     }
     
-    private void initBoard() {
-
-        setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
+    private void initMenu() {
+    	setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
+        addMouseListener(new MinesAdapter());
+        menu = new Menu();
+        System.out.print("test\n");
+    }
+    
+    private void initGame(int row,int col,int mines,String diff,int size){
+    	N_ROWS = row;
+    	N_COLS = col;
+    	N_MINES = mines;
+    	CELL_SIZE = size;
+        initBoard(diff);
+    }
+    
+    private void initBoard(String diff) {
 
         img = new Image[NUM_IMAGES];
 
         for (int i = 0; i < NUM_IMAGES; i++) {
 
-            var path = "src/resources/" + i + ".png";
+            var path = "src/resources/"+ diff + i + ".png";
             img[i] = (new ImageIcon(path)).getImage();
         }
-        //waktu di update setiap detik
-       timer1();
+
+        timer1();
         
-        addMouseListener(new MinesAdapter());
         newGame();
     }
 
@@ -95,7 +114,7 @@ public class Board extends JPanel {
         }
 
         statusbar.setText(Integer.toString(minesLeft));
-        timebar.setText("00:00");
+        timebar.setText("00:00"+hs.getHS());
 
         int i = 0;
 
@@ -285,7 +304,7 @@ public class Board extends JPanel {
             	 
             	 else 
             		 gameTime.append(Integer.toString(second));
-            	             	 
+            	 gameTime.append(hs.getHS());
                  timebar.setText(gameTime.toString());
             	 repaint();
              }
@@ -296,57 +315,64 @@ public class Board extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
+    	
+    	if(inMenu) {
+    		menu.render(g);
+    	}
+    	else {
+    		int uncover = 0;
+            
+            for (int i = 0; i < N_ROWS; i++) {
 
-        int uncover = 0;
-               
-        for (int i = 0; i < N_ROWS; i++) {
+                for (int j = 0; j < N_COLS; j++) {
 
-            for (int j = 0; j < N_COLS; j++) {
+                    int cell = field[(i * N_COLS) + j];
 
-                int cell = field[(i * N_COLS) + j];
+                    if (inGame && cell == MINE_CELL) {
 
-                if (inGame && cell == MINE_CELL) {
-
-                    inGame = false;
-                }
-
-                if (!inGame) {
-
-                    if (cell == COVERED_MINE_CELL) {
-                        cell = DRAW_MINE;
-                    } else if (cell == MARKED_MINE_CELL) {
-                        cell = DRAW_MARK;
-                    } else if (cell > COVERED_MINE_CELL) {
-                        cell = DRAW_WRONG_MARK;
-                    } else if (cell > MINE_CELL) {
-                        cell = DRAW_COVER;
+                        inGame = false;
                     }
 
-                } else {
+                    if (!inGame) {
 
-                    if (cell > COVERED_MINE_CELL) {
-                        cell = DRAW_MARK;
-                    } else if (cell > MINE_CELL) {
-                        cell = DRAW_COVER;
-                        uncover++;
+                        if (cell == COVERED_MINE_CELL) {
+                            cell = DRAW_MINE;
+                        } else if (cell == MARKED_MINE_CELL) {
+                            cell = DRAW_MARK;
+                        } else if (cell > COVERED_MINE_CELL) {
+                            cell = DRAW_WRONG_MARK;
+                        } else if (cell > MINE_CELL) {
+                            cell = DRAW_COVER;
+                        }
+
+                    } else {
+
+                        if (cell > COVERED_MINE_CELL) {
+                            cell = DRAW_MARK;
+                        } else if (cell > MINE_CELL) {
+                            cell = DRAW_COVER;
+                            uncover++;
+                        }
                     }
-                }
 
-                g.drawImage(img[cell], (j * CELL_SIZE),
-                        (i * CELL_SIZE), this);
+                    g.drawImage(img[cell], (j * CELL_SIZE),
+                            (i * CELL_SIZE), this);
+                }
             }
-        }
 
-        if (uncover == 0 && inGame) {
+            if (uncover == 0 && inGame) {
 
-            inGame = false;
-            statusbar.setText("Game won");
-            timer.stop();
+                inGame = false;
+                statusbar.setText("Game won");
+                timer.stop();
+                hs.compareHS(second);
 
-        } else if (!inGame) {
-        	timer.stop();
-            statusbar.setText("Game lost");
-        }
+            } else if (!inGame) {
+            	timer.stop();
+                statusbar.setText("Game lost");
+            }
+    	}
+        
     }
 
     private class MinesAdapter extends MouseAdapter {
@@ -356,70 +382,98 @@ public class Board extends JPanel {
 
             int x = e.getX();
             int y = e.getY();
-
-            int cCol = x / CELL_SIZE;
-            int cRow = y / CELL_SIZE;
-
-            boolean doRepaint = false;
-
-            if (!inGame) {
-
-                newGame();
-                repaint();
-            }
-
-            if ((x < N_COLS * CELL_SIZE) && (y < N_ROWS * CELL_SIZE)) {
-
-                if (e.getButton() == MouseEvent.BUTTON3) {
-
-                    if (field[(cRow * N_COLS) + cCol] > MINE_CELL) {
-
-                        doRepaint = true;
-
-                        if (field[(cRow * N_COLS) + cCol] <= COVERED_MINE_CELL) {
-
-                            if (minesLeft > 0) {
-                                field[(cRow * N_COLS) + cCol] += MARK_FOR_CELL;
-                                minesLeft--;
-                                String msg = Integer.toString(minesLeft);
-                                statusbar.setText(msg);
-                            } else {
-                                statusbar.setText("No marks left");
-                            }
-                        } else {
-
-                            field[(cRow * N_COLS) + cCol] -= MARK_FOR_CELL;
-                            minesLeft++;
-                            String msg = Integer.toString(minesLeft);
-                            statusbar.setText(msg);
-                        }
-                    }
-
-                } else {
-
-                    if (field[(cRow * N_COLS) + cCol] > COVERED_MINE_CELL) {
-
-                        return;
-                    }
-
-                    if ((field[(cRow * N_COLS) + cCol] > MINE_CELL)
-                            && (field[(cRow * N_COLS) + cCol] < MARKED_MINE_CELL)) {
-
-                        field[(cRow * N_COLS) + cCol] -= COVER_FOR_CELL;
-                        doRepaint = true;
-
-                        if (field[(cRow * N_COLS) + cCol] == MINE_CELL) {
-                            inGame = false;
-                        }
-
-                        if (field[(cRow * N_COLS) + cCol] == EMPTY_CELL) {
-                            find_empty_cells((cRow * N_COLS) + cCol);
-                        }
+            
+            if (inMenu == true) {
+            	
+                if (x >= 110 && x <= 380) {
+                    if (y >= 150 && y <= 250) {
+                        inMenu = false;
+                        hs = new HighScore("easy.txt");
+                        initGame(10,10,10,"easy/",50);
                     }
                 }
 
-                if (doRepaint) {
+                if (x >= 110 && x <= 380) {
+                    if (y >= 260 && y <= 360) {
+                        inMenu = false;
+                        hs = new HighScore("medium.txt");
+                        initGame(20,20,50,"medium/",25);
+                    }
+                }
+
+                if (x >= 110 && x <= 380) {
+                    if (y >= 370 && y <= 470) {
+                    	inMenu = false;
+                    	hs = new HighScore("hard.txt");
+                    	initGame(25,25,100,"hard/",20);
+                    }
+                }
+            }
+            else {
+            	int cCol = x / CELL_SIZE;
+                int cRow = y / CELL_SIZE;
+
+                boolean doRepaint = false;
+
+                if (!inGame) {
+
+                    newGame();
                     repaint();
+                }
+
+                if ((x < N_COLS * CELL_SIZE) && (y < N_ROWS * CELL_SIZE)) {
+
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+
+                        if (field[(cRow * N_COLS) + cCol] > MINE_CELL) {
+
+                            doRepaint = true;
+
+                            if (field[(cRow * N_COLS) + cCol] <= COVERED_MINE_CELL) {
+
+                                if (minesLeft > 0) {
+                                    field[(cRow * N_COLS) + cCol] += MARK_FOR_CELL;
+                                    minesLeft--;
+                                    String msg = Integer.toString(minesLeft);
+                                    statusbar.setText(msg);
+                                } else {
+                                    statusbar.setText("No marks left");
+                                }
+                            } else {
+
+                                field[(cRow * N_COLS) + cCol] -= MARK_FOR_CELL;
+                                minesLeft++;
+                                String msg = Integer.toString(minesLeft);
+                                statusbar.setText(msg);
+                            }
+                        }
+
+                    } else {
+
+                        if (field[(cRow * N_COLS) + cCol] > COVERED_MINE_CELL) {
+
+                            return;
+                        }
+
+                        if ((field[(cRow * N_COLS) + cCol] > MINE_CELL)
+                                && (field[(cRow * N_COLS) + cCol] < MARKED_MINE_CELL)) {
+
+                            field[(cRow * N_COLS) + cCol] -= COVER_FOR_CELL;
+                            doRepaint = true;
+
+                            if (field[(cRow * N_COLS) + cCol] == MINE_CELL) {
+                                inGame = false;
+                            }
+
+                            if (field[(cRow * N_COLS) + cCol] == EMPTY_CELL) {
+                                find_empty_cells((cRow * N_COLS) + cCol);
+                            }
+                        }
+                    }
+
+                    if (doRepaint) {
+                        repaint();
+                    }
                 }
             }
         }

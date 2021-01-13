@@ -11,6 +11,12 @@ import javax.swing.JLabel;
  * Author: Jan Bodnar
  * Website: http://zetcode.com
  */
+/**
+ * Edited by:
+ * Zulfiqar Fauzu Akbar 05111940000101
+ * Nabil Fikri Arief 05111940000086
+ * Repo : https://github.com/Moon3903/Java-Minesweeper-Game
+ */
 
 public class Minesweeper extends JFrame {
 

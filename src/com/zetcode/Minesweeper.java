@@ -14,11 +14,12 @@ import javax.swing.JLabel;
 
 public class Minesweeper extends JFrame {
 
-    private JLabel statusbar;
+	private static final long serialVersionUID = -3304110230471563744L;
+	
+	private JLabel statusbar;
     private JLabel timebar;
 
     public Minesweeper() {
-
         initUI();
     }
 
@@ -31,6 +32,9 @@ public class Minesweeper extends JFrame {
         timebar = new JLabel("");
         add(timebar, BorderLayout.NORTH);
         
+        //easy : 8 8 10
+        //mid : 16 16 40
+        //hard : 30 16 99
         add(new Board(statusbar,timebar));
 
         setResizable(false);
@@ -42,16 +46,10 @@ public class Minesweeper extends JFrame {
     }
 
     public static void main(String[] args) {
-    	try {
-	        EventQueue.invokeLater(() -> {
-	
-	            var ex = new Minesweeper();
-	            ex.setVisible(true);
-	        });
-    	}
-    	catch(Exception e) {
-    		//TO DO ???
-    		System.out.print("ERROR"); 
-    	}
+    	EventQueue.invokeLater(() -> {
+    		
+            var ex = new Minesweeper();
+            ex.setVisible(true);
+        });
     }
 }

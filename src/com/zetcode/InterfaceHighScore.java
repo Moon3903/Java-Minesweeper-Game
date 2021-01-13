@@ -1,5 +1,6 @@
 package com.zetcode;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public interface InterfaceHighScore {
@@ -7,5 +8,5 @@ public interface InterfaceHighScore {
 	public String getHS();
 	public Path checkFiles(Path path, Path file);
 	public String readFile();
-	public void writeFile(String str);
+	public void writeFile(String str) throws IOException;
 }

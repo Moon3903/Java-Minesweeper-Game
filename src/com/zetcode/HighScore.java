@@ -53,7 +53,6 @@ public class HighScore extends StreamBasic implements InterfaceHighScore {
 		int second,minute;
 		if (tmp==-1) {
 			hs=hs+"--:--";
-			System.out.println(hs);
 			return hs;
 		}
 		else {

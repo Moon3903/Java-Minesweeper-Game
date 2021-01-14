@@ -365,7 +365,7 @@ public class Board extends JPanel {
                 inGame = false;
                 statusbar.setText("Game won");
                 timer.stop();
-                hs.compareHS(second);
+                hs.compareHS(second+minute*60);
 
             } else if (!inGame) {
             	timer.stop();

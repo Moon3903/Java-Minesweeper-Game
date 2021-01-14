@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class HighScore implements InterfaceHighScore {
+public class HighScore extends StreamBasic implements InterfaceHighScore {
 	
 	private Path path;
 	private Path file;
@@ -96,6 +96,7 @@ public class HighScore implements InterfaceHighScore {
 		return absPath;
 	}
 	
+	//overriding
 	public String readFile() {
 		try(BufferedReader br = new BufferedReader(new FileReader(pathFile.toString()))){
 			String line = br.readLine();
@@ -106,11 +107,8 @@ public class HighScore implements InterfaceHighScore {
 		}//end catch
 		return null;
 	}
-	
+	//overriding
 	public void writeFile(String str) throws IOException{
-		PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(pathString)));
-		System.out.println("writing "+str+" to "+file.toString());
-		writer.println(str);
-		writer.close();
+		super.writeFile(pathString, str);
 	}
 }
